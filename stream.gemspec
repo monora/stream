@@ -7,9 +7,6 @@ Gem::Specification.new do |s|
   s.summary = "stream - Extended External Iterators"
   s.description = "Module Stream defines an interface for external iterators."
 
-
-  s.add_dependency 'generator'
-
   #### Dependencies and requirements.
 
   s.add_development_dependency 'rake'
