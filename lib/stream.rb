@@ -1,4 +1,4 @@
-STREAM_VERSION = '0.5.4'.freeze
+STREAM_VERSION = '0.5.5'.freeze
 
 ##
 # Module Stream defines an interface for an external Iterator which
