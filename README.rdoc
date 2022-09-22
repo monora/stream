@@ -1,4 +1,5 @@
 {<img src="https://github.com/monora/stream/actions/workflows/ruby.yml/badge.svg" alt="Build Status" />}[https://github.com/monora/stream/actions/workflows/ruby.yml]
+{<img src="https://badge.fury.io/rb/stream.svg" alt="Version" />}[https://badge.fury.io/rb/stream]
 
 = Extended External Iterators (forward and backward)
 
