@@ -1,3 +1,7 @@
+Copyright (c) 2002-2026 Horst Duchene <monora@gmail.com>
+
+stream is distributed under the same license as Ruby.
+
 Ruby is copyrighted free software by Yukihiro Matsumoto <matz@netlab.jp>.
 You can redistribute it and/or modify it under either the terms of the
 2-clause BSDL (see the file BSDL), or the conditions below:

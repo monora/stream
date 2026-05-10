@@ -9,8 +9,6 @@ Gem::Specification.new do |s|
   #### Dependencies and requirements.
 
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'yard'
-  s.add_development_dependency 'rdoc'
   s.add_development_dependency 'test-unit'
 
   #### Which files are to be included in this gem?
@@ -21,7 +19,7 @@ Gem::Specification.new do |s|
     'test/**/*.rb',
     'examples/**/*',
     'Gemfile',
-    'README.rdoc',
+    'README.md',
     'LICENSE',
     'Rakefile'
   ]
@@ -30,15 +28,6 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib']
   s.license  = 'ruby'
-
-  #### Documentation and testing.
-
-  s.extra_rdoc_files = ['README.rdoc']
-  s.rdoc_options += [
-      '--title', s.summary,
-      '--main', 'README.rdoc',
-      '--line-numbers'
-  ]
 
   #### Author and project details.
 
