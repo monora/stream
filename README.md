@@ -1,0 +1,209 @@
+[![Build Status](https://github.com/monora/stream/actions/workflows/ruby.yml/badge.svg)](https://github.com/monora/stream/actions/workflows/ruby.yml)
+[![Version](https://img.shields.io/gem/v/stream.svg)](https://rubygems.org/gems/stream)
+
+# Extended External Iterators (forward and backward)
+
+## Description
+
+Module `Stream` defines an interface for [external
+iterators](https://wiki.c2.com/?ExternalIterator). A stream can be seen
+as an iterator on a sequence of objects `x1,...,xn`. The state of the
+stream is uniquely determined by the following methods:
+
+* `at_beginning?`
+* `at_end?`
+* `current`
+* `peek`
+
+State changes are done with the following operations:
+
+* `set_to_begin`
+* `set_to_end`
+* `forward`
+* `backward`
+
+With the help of the method `current_edge` the state of a stream `s` can be
+exactly defined
+
+```
+s.current_edge == [s.current, s.peek]
+```
+
+If `s` a stream on `[x1,...,xn]`. Consider the edges `[xi,xi+1]` i=1,...,n
+and `[x0,x1]` and `[xn,xn+1]` (x0 and xn+1 are helper elements to define
+the boundary conditions). Then if `s` is non empty, the following
+conditions must be true:
+
+```
+s.at_beginning? <=> s.current_edge == [x0,x1]
+s.at_end?       <=> s.current_edge == [xn,xn+1]
+s.empty?        <=> s.at_beginning? && s.at_end? <=> s.current_edge == [x0,x1] <=> n = 0
+s.set_to_end    => s.at_end?
+s.set_to_begin  => s.at_beginning?
+```
+
+If `0 <= i < n` and `s.current_edge == [xi, xi+1]`, then:
+
+```
+[s.forward, s.current_edge] == [xi+1, [xi+1, xi+2]]
+```
+
+If `1 <= i < n` and `s.current_edge == [xi, xi+1]`, then:
+
+```
+[s.backward, s.current_edge] == [xi, [xi-1, xi]]
+```
+
+The result of `peek` is the same as of `forward` without changing state. The result of
+`current` is the same as of `backward` without changing state.
+
+Module `Stream` includes `Enumerable` implementing `each` in the obvious way.
+
+Not every stream needs to implement `backward` and `at_beginning?`
+thus being not reversable. If they are reversable `peek` can easily be
+implemented using `forward` and `backward`, as is done in module
+`Stream`. If a stream is not reversable all derived streams provided
+by the stream module (filter, mapping, concatenation) can be used
+anyway. Explicit or implicit (via `peek` or `current`) uses of `backward`
+would throw a `NotImplementedError`.
+
+Classes implementing the stream interface must implement the following
+methods:
+
+* `basic_forward`
+* `basic_backward`
+* `at_end?`
+* `at_beginning?`
+
+The methods `set_to_end` and `set_to_begin` are by default implemented as:
+
+```
+set_to_end   :  until at_end?; do basic_forward end
+set_to_begin :  until at_beginning?; do basic_backward end
+```
+
+The methods `forward` and `backward` are by default implemented as:
+
+```
+forward:  raise EndOfStreamException if at_end?; basic_forward.
+backward: raise EndOfStreamException if at_beginning?; basic_backward
+```
+
+Thus subclasses must only implement **four** methods. Efficiency sometimes
+demands better implementations.
+
+There are several concrete classes implementing the stream interface:
+
+* `Stream::EmptyStream` (boring)
+* `Stream::CollectionStream` created by the method `Array#create_stream`
+* `Stream::FilteredStream` created by the method `Stream#filtered`
+* `Stream::ReversedStream` created by the method `Stream#reverse`
+* `Stream::ConcatenatedStream` created by the method `Stream#concatenate`
+* `Stream::ImplicitStream` using closures for the basic methods to implement
+
+## Installation
+
+```bash
+gem install stream
+```
+
+or download the latest sources from the git repository
+<https://github.com/monora/stream>.
+
+## Examples
+
+### Iterate over three streams
+
+```ruby
+g = ('a'..'f').create_stream
+h = (1..10).create_stream
+i = (10..20).create_stream
+
+until g.at_end? || h.at_end? || i.at_end?
+  p [g.forward, h.forward, i.forward]
+end
+```
+
+Output:
+
+```
+["a", 1, 10]
+["b", 2, 11]
+["c", 3, 12]
+["d", 4, 13]
+["e", 5, 14]
+["f", 6, 15]
+```
+
+### Concatenate file streams
+
+```ruby
+def filestream fname
+  Stream::ImplicitStream.new { |s|
+    f = open(fname)
+    s.at_end_proc = proc {f.eof?}
+    s.forward_proc = proc {f.readline}
+    # Need not implement backward moving to use the framework
+  }
+end
+
+(filestream("/etc/passwd") + ('a'..'f').create_stream + filestream("/etc/group")).each do |l|
+  puts l
+end
+```
+
+### Two filtered collection streams concatenated and reversed
+
+```ruby
+def newstream; (1..6).create_stream; end
+s = newstream.filtered { |x| x % 2 == 0 } + newstream.filtered { |x| x % 2 != 0 }
+s = s.reverse
+puts "Contents      : #{s.to_a.join ' '}"
+puts "At end?       : #{s.at_end?}"
+puts "At beginning? : #{s.at_beginning?}"
+puts "2xBackwards   : #{s.backward} #{s.backward}"
+puts "Forward       : #{s.forward}"
+puts "Peek          : #{s.peek}"
+puts "Current       : #{s.current}"
+puts "set_to_begin  : Peek=#{s.set_to_begin;s.peek}"
+```
+
+Output:
+
+```
+Contents      : 5 3 1 6 4 2
+At end?       : true
+At beginning? : false
+2xBackwards   : 2 4
+Forward       : 4
+Peek          : 2
+Current       : 4
+set_to_begin  : Peek=5
+```
+
+### An infinite stream (do not use `set_to_end`!)
+
+```ruby
+def randomStream
+  Stream::ImplicitStream.new { |s|
+    s.set_to_begin_proc = proc {srand 1234}
+    s.at_end_proc = proc {false}
+    s.forward_proc = proc {rand}
+  }
+end
+s = randomStream.filtered { |x| x >= 0.5 }.collect { |x| sprintf("%5.2f",x*100) }
+puts "5 random numbers: #{(1..5).collect {|x| s.forward}}\n"
+```
+
+Output:
+
+```
+5 random numbers: ["62.21", "78.54", "78.00", "80.19", "95.81"]
+```
+
+## Copying
+
+stream is Copyright (c) 2002-2026 by Horst Duchene.
+
+It is free software, and may be redistributed under the terms specified
+in the [LICENSE](LICENSE) file.
