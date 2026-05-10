@@ -1,6 +1,5 @@
 # Rakefile for stream   -*- ruby -*-
 
-require 'rubygems'
 require 'bundler/setup'
 require 'rubygems/package_task'
 
@@ -8,8 +7,6 @@ require 'rake/testtask'
 require 'rake/clean'
 require 'yard'
 
-$:.unshift File.join(File.dirname(__FILE__), 'lib')
-require 'stream' # require module to STREAM_VERSION
 
 SRC_RB = FileList['lib/*.rb']
 

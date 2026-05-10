@@ -28,8 +28,7 @@ Gem::Specification.new do |s|
 
   #### Load-time details: library and application (you will need one or both).
 
-  s.require_path = 'lib'
-  s.autorequire  = 'stream'
+  s.require_paths = ['lib']
   s.license  = 'ruby'
 
   #### Documentation and testing.
