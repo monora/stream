@@ -1,5 +1,5 @@
 {<img src="https://github.com/monora/stream/actions/workflows/ruby.yml/badge.svg" alt="Build Status" />}[https://github.com/monora/stream/actions/workflows/ruby.yml]
-{<img src="https://badge.fury.io/rb/stream.svg" alt="Version" />}[https://badge.fury.io/rb/stream]
+{<img src="https://img.shields.io/gem/v/stream.svg" alt="Version" />}[https://rubygems.org/gems/stream]
 
 = Extended External Iterators (forward and backward)
 
@@ -34,7 +34,7 @@ conditions must be true:
 
  s.at_beginning? <=> s.current_edge == [x0,x1]
  s.at_end? <=> s.current_edge == [xn,xn+1]
- s.isEmpty? <=> s.at_beginning? && s.at_end? <=> s.current_edge == [x0,x1] <=> n = 0
+ s.empty? <=> s.at_beginning? && s.at_end? <=> s.current_edge == [x0,x1] <=> n = 0
  s.set_to_end => s.at_end?
  s.set_to_begin => s.at_beginning?
 

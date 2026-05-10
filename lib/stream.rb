@@ -24,15 +24,17 @@ module Stream
   end
 
   # Move forward one position. Returns the _target_ of current_edge.
-  # Raises Stream::EndOfStreamException if at_end? is true.
+  # @raise [EndOfStreamException] if at_end? is true
+  # @return [Object] the next element
   def forward
     raise EndOfStreamException if at_end?
 
     basic_forward
   end
 
-  # Move backward one position. Returns the _source_ of current_edge. Raises
-  # Stream::EndOfStreamException if at_beginning? is true.
+  # Move backward one position. Returns the _source_ of current_edge.
+  # @raise [EndOfStreamException] if at_beginning? is true
+  # @return [Object] the previous element
   def backward
     raise EndOfStreamException if at_beginning?
 
@@ -79,6 +81,8 @@ module Stream
   # This is similar to #detect, but starts the search from the
   # current position. #detect, which is inherited from Enumerable uses
   # #each, which implicitly calls #set_to_begin.
+  # @yield [element] each element in forward direction
+  # @return [Object, nil] the first matching element, or nil
   def move_forward_until
     until at_end?
       element = basic_forward
@@ -89,6 +93,8 @@ module Stream
 
   # Move backward until the boolean block is not false and returns the element
   # found. Returns nil if no object matches.
+  # @yield [element] each element in backward direction
+  # @return [Object, nil] the first matching element, or nil
   def move_backward_until
     until at_beginning?
       element = basic_backward
@@ -192,6 +198,7 @@ module Stream
     attr_reader :pos
 
     # Creates a new CollectionStream for the indexable sequence _seq_.
+    # @param seq [Array] an integer-indexed collection
     def initialize(seq)
       @seq = seq
       set_to_begin
@@ -252,6 +259,7 @@ module Stream
 
     # Create a new IntervalStream with upper bound _stop_. stop - 1 is the last
     # element. By default _stop_ is zero which means that the stream is empty.
+    # @param stop [Integer] exclusive upper bound; stream yields 0..stop-1
     def initialize(stop = 0)
       @stop = stop - 1
       set_to_begin
@@ -617,6 +625,8 @@ module Stream
     #
     # If a block is given to new, than it is called with the new ImplicitStream
     # stream as parameter letting the client overwriting the default blocks.
+    # @param other_stream [Stream, nil] optional stream to wrap
+    # @yield [self] the new ImplicitStream instance for customization
     def initialize(other_stream = nil)
       # Initialize with defaults
       @at_beginning_proc = proc { true }
@@ -674,7 +684,9 @@ module Stream
 
   ##
   # Return a Stream::FilteredStream which iterates over all my elements
-  # satisfying the condition specified  by the block.
+  # satisfying the condition specified by the block.
+  # @yield [element] filter predicate
+  # @return [FilteredStream]
   def filtered(&block)
     FilteredStream.new(self, &block)
   end
@@ -687,6 +699,8 @@ module Stream
   # Create a Stream::MappedStream wrapper on self. Instead of returning the
   # stream element on each move, the value of calling _mapping_ is returned
   # instead. See Stream::MappedStream for examples.
+  # @yield [element] mapping block applied to each element
+  # @return [MappedStream]
   def collect(&mapping)
     MappedStream.new(self, &mapping)
   end
@@ -708,8 +722,10 @@ module Stream
     collect(&mapping).concatenate
   end
 
-  # Create a Stream::ConcatenatedStream by concatenatating the receiver and
-  # _other_stream_
+  # Create a Stream::ConcatenatedStream by concatenating the receiver and
+  # _other_stream_.
+  # @param other [Stream] the stream to append
+  # @return [ConcatenatedStream]
   #
   #  (%w(a b c).create_stream + [4,5].create_stream).to_a
   #  ==> ["a", "b", "c", 4, 5]
