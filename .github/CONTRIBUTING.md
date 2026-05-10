@@ -34,7 +34,7 @@ bundle install
 
 ```bash
 bundle exec rake test          # full test suite
-bundle exec rake test TEST=test/stream_test.rb  # single file
+bundle exec rake test TEST=test/teststream.rb   # single file
 ```
 
 ## How to Contribute
