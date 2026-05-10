@@ -1,9 +1,8 @@
-$:.unshift File.join(File.dirname(__FILE__), 'lib')
-require 'stream'
+require_relative 'lib/stream/version'
 
 Gem::Specification.new do |s|
   s.name    = 'stream'
-  s.version = STREAM_VERSION
+  s.version = Stream::VERSION
   s.summary = "stream - Extended External Iterators"
   s.description = "Module Stream defines an interface for external iterators."
 

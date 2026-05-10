@@ -1,0 +1,30 @@
+name: Prepare Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GoogleCloudPlatform/release-please-action@v5
+        id: release
+        with:
+          release-type: ruby
+          package-name: stream
+          bump-minor-pre-major: true
+          version-file: "lib/stream/version.rb"
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Run tests
+        run: bundle exec rake test
+        if: ${{ steps.release.outputs.release_created }}
